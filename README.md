@@ -47,6 +47,15 @@ SET GLOBAL slow_query_log_file = '/var/log/mysqld-slow.err';
 SET GLOBAL long_query_time = 2;
 ```
 
+You can "trick" the slow query log into activating using the following query.
+
+```sql
+SELECT SLEEP(3);
+```
+
+This will cause MySQL to sleep and so trigger the slow query log. You should
+then see some output in the log at `/var/log/mysqld-slow.err`.
+
 ## Read The Slow Query Log
 
 The slow query log can be read simply using `cat /var/log/mysqld-slow.err`, but
