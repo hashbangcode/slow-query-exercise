@@ -18,7 +18,7 @@ The first two are:
 - `slow_query_log_file` - The file to log slow query data to.
 
 ```sql
-]> SHOW GLOBAL VARIABLES LIKE 'slow_query%';
+> SHOW GLOBAL VARIABLES LIKE 'slow_query%';
 +---------------------+---------------------+
 | Variable_name       | Value               |
 +---------------------+---------------------+
