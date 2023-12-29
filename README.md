@@ -2,6 +2,76 @@
 
 An exercise to show how to fix slow MySQL/MariaDB queries.
 
+This includes
+- Activating and configuring the slow query log.
+- Reading slow query log.
+- Creating a database that causes queries to be slow.
+- Optimizing the database.
+
+## Activate The Slow Query Log
+
+There are three variables to check for the slow query log.
+
+The first two are:
+
+- `slow_query_log` - A boolean showing if the slow query low is active.
+- `slow_query_log_file` - The file to log slow query data to.
+
+```sql
+]> SHOW GLOBAL VARIABLES LIKE 'slow_query%';
++---------------------+---------------------+
+| Variable_name       | Value               |
++---------------------+---------------------+
+| slow_query_log      | ON                  |
+| slow_query_log_file | /var/log/mysqld.err |
++---------------------+----------------------+
+```
+
+There is also `long_query_time`, which is the minimum time (in seconds) before
+a query is considered "slow" and is written to the log.
+
+```sql
+> SHOW GLOBAL VARIABLES LIKE 'long_query_time';
++-----------------+-----------+
+| Variable_name   | Value     |
++-----------------+-----------+
+| long_query_time | 10.000000 |
++-----------------+-----------+
+```
+
+Activate the slow query log.
+
+```sql
+SET GLOBAL slow_query_log = 'ON';
+SET GLOBAL slow_query_log_file = '/var/log/mysqld-slow.err';
+SET GLOBAL long_query_time = 2;
+```
+
+## Read The Slow Query Log
+
+The slow query log can be read simply using `cat /var/log/mysqld-slow.err`, but
+you can use the `mysqldumpslow` command to analyse the log for the worst
+offenders.
+
+```
+mysqldumpslow -t 5 /var/log/mysqld-slow.err
+```
+
+This will produce output like this:
+
+```
+Reading mysql slow query log from /var/log/mysqld-slow.err
+Count: 1  Time=924.57s (924s)  Lock=0.00s (0s)  Rows_sent=60612.0 (60612), Rows_examined=100000.0 (100000), Rows_affected=0.0 (0), root[root]@localhost
+  SELECT *
+  FROM users AS u
+  LEFT JOIN club_members AS cm ON u.id = cm.user_id
+  LEFT JOIN clubs AS c ON cm.club_id = c.id
+  WHERE cm.user_id IS NULL
+```
+
+Once you have identified the slow queries you should use the `EXPLAIN` command
+to figure out what is wrong.
+
 ## Generate Fake Content
 
 The [Faker](https://fakerphp.github.io/) project is used to generate the fake
