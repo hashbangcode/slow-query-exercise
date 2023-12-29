@@ -1,0 +1,18 @@
+{
+    "name": "philipnorton42/slow_query",
+    "type": "project",
+    "require": {
+        "fakerphp/faker": "^1.23"
+    },
+    "autoload": {
+        "psr-4": {
+            "Philipnorton42\\SlowQuery\\": "src/"
+        }
+    },
+    "authors": [
+        {
+            "name": "Phil Norton",
+            "email": "philipnorton42@gmail.com"
+        }
+    ]
+}
