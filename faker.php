@@ -22,8 +22,8 @@ $usersFile = 'users.csv';
 $clubsFile = 'clubs.csv';
 $clubMembersFile = 'club_members.csv';
 
-$userRange = 100_000;
-$clubRange = 100_000;
+$userRange = 10_000;
+$clubRange = 10_000;
 
 $users = [];
 for ($i = 1; $i <= $userRange; $i++) {
