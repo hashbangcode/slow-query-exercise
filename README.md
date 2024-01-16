@@ -23,7 +23,7 @@ The first two are:
 | Variable_name       | Value               |
 +---------------------+---------------------+
 | slow_query_log      | ON                  |
-| slow_query_log_file | /var/log/mysqld.err |
+| slow_query_log_file | /var/log/mysqld.log |
 +---------------------+----------------------+
 ```
 
@@ -39,11 +39,11 @@ a query is considered "slow" and is written to the log.
 +-----------------+-----------+
 ```
 
-Activate the slow query log.
+Activate the slow query log using the following commands.
 
 ```sql
 SET GLOBAL slow_query_log = 'ON';
-SET GLOBAL slow_query_log_file = '/var/log/mysqld-slow.err';
+SET GLOBAL slow_query_log_file = '/var/log/mysqld-slow.log';
 SET GLOBAL long_query_time = 2;
 ```
 
@@ -54,22 +54,22 @@ SELECT SLEEP(3);
 ```
 
 This will cause MySQL to sleep and so trigger the slow query log. You should
-then see some output in the log at `/var/log/mysqld-slow.err`.
+then see some output in the log at `/var/log/mysqld-slow.log`.
 
 ## Read The Slow Query Log
 
-The slow query log can be read simply using `cat /var/log/mysqld-slow.err`, but
+The slow query log can be read simply using `cat /var/log/mysqld-slow.log`, but
 you can use the `mysqldumpslow` command to analyse the log for the worst
 offenders.
 
 ```
-mysqldumpslow -t 5 /var/log/mysqld-slow.err
+mysqldumpslow -t 5 /var/log/mysqld-slow.log
 ```
 
 This will produce output like this:
 
 ```
-Reading mysql slow query log from /var/log/mysqld-slow.err
+Reading mysql slow query log from /var/log/mysqld-slow.log
 Count: 1  Time=924.57s (924s)  Lock=0.00s (0s)  Rows_sent=60612.0 (60612), Rows_examined=100000.0 (100000), Rows_affected=0.0 (0), root[root]@localhost
   SELECT *
   FROM users AS u
@@ -96,12 +96,12 @@ To create the data, do the following:
 - Run `composer install` to install the Faker package.
 - Run `php faker.php` to generate the data.
 
-This will generate 100,000 user and club records, and half the number of users
+This will generate 10,000 user and club records, and half the number of users
 as club member records. This is in order to generate users who are not part of
 a club.
 
-The queries with 100,000 items of data in a non-optimized setup will take quite
-a while, so reduce this if you don't want to wait around.
+The queries with 10,000 items of data in a non-optimized setup will take quite
+a few seconds, this can be increased to really slow down the example queries.
 
 ## Create The Database And Import The Data
 
@@ -113,7 +113,7 @@ imported in two ways, using a slow setup and an optimized setup.
 To install the slow setup.
 
 ```
-mysql -u root -proot < slow_setup.sql
+mysql -u root -p < slow_setup.sql
 ```
 
 The tables in this setup contain no indexes.
@@ -123,7 +123,7 @@ The tables in this setup contain no indexes.
 To install the optimized setup.
 
 ```
-mysql -u root -proot < optimized_setup.sql
+mysql -u root -p < optimized_setup.sql
 ```
 
 This setup adds the required indexes to the tables, but also forces the InnoDB
@@ -153,8 +153,8 @@ LEFT JOIN clubs AS c ON cm.club_id = c.id
 WHERE cm.user_id IS NULL;
 ```
 
-On un-optimised tables with 100,000 items of data this query takes 15 minutes
-(15 mins 24 seconds).
+On un-optimised tables with 10,000 items of data this query takes around 7
+seconds.
 
 After optimizing, the query took 0.1 seconds.
 
@@ -167,8 +167,8 @@ INNER JOIN club_members AS cm ON u.id = cm.user_id
 INNER JOIN clubs AS c ON cm.club_id = c.id;
 ```
 
-On un-optimised tables with 100,000 items of data this query takes 8 minutes
-(8 mins 18 seconds).
+On un-optimised tables with 10,000 items of data this query takes around 5
+seconds.
 
 After optimizing, the query took 0.1 seconds.
 
@@ -185,7 +185,11 @@ ORDER BY COUNT(cm.club_id) DESC
 LIMIT 10;
 ```
 
-On un-optimised tables with 100,000 items of data this query takes nearly 10
-minutes (9 mins 49 seconds).
+On un-optimised tables with 10,000 items of data this query takes around 5
+seconds.
 
 After optimizing, the query took 0.2 seconds.
+
+If you increase the number of rows from 10,000 to 100,000 then the queries seen
+here take over 10 minutes to complete. At this level the slow query log can be
+triggered without waiting around for the queries to complete.
